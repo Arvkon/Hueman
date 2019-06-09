@@ -14,21 +14,22 @@ class ColorPageViewController: UIPageViewController {
         super.viewDidLoad()
 
         dataSource = self
+        delegate = self
 
         setViewControllers([newColorViewController()], direction: .forward, animated: false, completion: nil)
     }
 
     private func newColorViewController() -> UIViewController {
         let colorVC = UIViewController()
-        colorVC.view.backgroundColor = randomColor()
+        colorVC.view.backgroundColor = .random()
         return colorVC
     }
 
-    private func randomColor() -> UIColor {
-        return UIColor(red: CGFloat.random(in: 0.0...1.0),
-                       green: CGFloat.random(in: 0.0...1.0),
-                       blue: CGFloat.random(in: 0.0...1.0),
-                       alpha: 1.0)
+    private var titleAnimation: CAAnimation {
+        let transition = CATransition()
+        transition.duration = 0.2
+        transition.type = .fade
+        return transition
     }
 
 }
@@ -43,6 +44,23 @@ extension ColorPageViewController: UIPageViewControllerDataSource {
 
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
         return newColorViewController()
+    }
+
+}
+
+// MARK: UIPageViewControllerDelegate
+
+extension ColorPageViewController: UIPageViewControllerDelegate {
+
+    func pageViewController(_ pageViewController: UIPageViewController, willTransitionTo pendingViewControllers: [UIViewController]) {
+        navigationController?.navigationBar.layer.add(titleAnimation, forKey: "fadeText")
+        navigationItem.title = nil
+    }
+
+    func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
+        guard let newColor = viewControllers?.first?.view?.backgroundColor else { return }
+        navigationController?.navigationBar.layer.add(titleAnimation, forKey: "fadeText")
+        navigationItem.title = "#\(newColor.hex)"
     }
 
 }
